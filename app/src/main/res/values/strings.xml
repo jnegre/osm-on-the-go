@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">OSM On The Go</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_add_fixme">Add FIXME</string>
+    <string name="action_add_address">Add Address</string>
+    <string name="action_my_location">Show My Location</string>
+    <string name="action_share">Share</string>
+    <string name="action_clear_all">Clear All</string>
+
+    <string name="label_addr_street">Street:</string>
+    <string name="hint_addr_street">addr:street</string>
+    <string name="label_addr_number">Number:</string>
+    <string name="hint_addr_number">addr:housenumber</string>
+
+</resources>
