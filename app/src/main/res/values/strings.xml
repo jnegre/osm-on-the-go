@@ -8,6 +8,8 @@
     <string name="action_my_location">Show My Location</string>
     <string name="action_share">Share</string>
     <string name="action_clear_all">Clear All</string>
+    <string name="action_show_layer_bano">Show BANO</string>
+    <string name="action_show_layer_noname">Show NONAME</string>
 
     <string name="label_addr_street">Street:</string>
     <string name="hint_addr_street">addr:street</string>
