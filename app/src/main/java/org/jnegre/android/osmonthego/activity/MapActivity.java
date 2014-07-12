@@ -59,7 +59,7 @@ public class MapActivity extends Activity {
 		//mapView.getOverlayManager().add(new TilesOverlay(new MapTileProviderBasic(context, ExtraTileSourceFactory.BANO), context));
 		//mapView.getOverlayManager().add(new TilesOverlay(new MapTileProviderBasic(context, ExtraTileSourceFactory.NO_NAME), context));
 
-		mapView.setBuiltInZoomControls(true);
+		mapView.setMultiTouchControls(true);
 
 		Log.d(TAG, "restoring saved bounding box");
 		SharedPreferences pref = getPreferences(MODE_PRIVATE);
