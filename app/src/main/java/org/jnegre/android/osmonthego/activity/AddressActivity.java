@@ -1,11 +1,13 @@
 package org.jnegre.android.osmonthego.activity;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +23,9 @@ import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData;
 public class AddressActivity extends Activity {
 
 	private final static String TAG = "AddressActivity";
+
+	private final static String PREF_PAD_EXTENSION = "PAD_EXTENSION";
+	private final static PadExtension DEFAULT_PAD_EXTENSION = PadExtension.LATIN;
 
 	public final static String EXTRA_LATITUDE = "lat";
 	public final static String EXTRA_LONGITUDE = "long";
@@ -52,17 +57,39 @@ public class AddressActivity extends Activity {
 			menuItem.setChecked(true);
 		}
 
+		Fragment fragment = new PadExtensionFragment();
+		Bundle bundle = new Bundle();
+		bundle.putInt(PadExtensionFragment.LAYOUT, pe.getLayout());
+		fragment.setArguments(bundle);
+
 		FragmentManager fragmentManager = getFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.extension_pad, new PadExtensionFragment(pe.getLayout()));
+		fragmentTransaction.replace(R.id.extension_pad, fragment);
 		fragmentTransaction.commit();
+
+		SharedPreferences pref = getPreferences(MODE_PRIVATE);
+		pref.edit()
+				.putString(PREF_PAD_EXTENSION, pe.name())
+				.commit();
+
+	}
+
+	private PadExtension getSavedPadExtension() {
+
+		String saved = getPreferences(MODE_PRIVATE).getString(PREF_PAD_EXTENSION, DEFAULT_PAD_EXTENSION.name());
+		try {
+			return Enum.valueOf(PadExtension.class, saved);
+		} catch (IllegalArgumentException e) {
+			//the saved PadExtension does not exist anymore
+			return DEFAULT_PAD_EXTENSION;
+		}
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_address);
-		PadExtension savedPE = PadExtension.LATIN; //TODO save this
+		PadExtension savedPE = getSavedPadExtension();
 		showPadExtension(savedPE, null);
 	}
 
@@ -105,8 +132,7 @@ public class AddressActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.address, menu);
-		PadExtension savedPE = PadExtension.LATIN; //TODO save this
-		MenuItem menuItem = menu.findItem(savedPE.getAction());
+		MenuItem menuItem = menu.findItem(getSavedPadExtension().getAction());
 		menuItem.setChecked(true);
 		return true;
 	}

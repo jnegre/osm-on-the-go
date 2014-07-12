@@ -8,14 +8,11 @@ import android.view.ViewGroup;
 
 public class PadExtensionFragment extends Fragment {
 
-	private final int layout;
-
-	public PadExtensionFragment(int layout) {
-		this.layout = layout;
-	}
+	public final static String LAYOUT = "LAYOUT";
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		int layout = getArguments().getInt(LAYOUT);
 		return inflater.inflate(layout, container, false);
 	}
 }
