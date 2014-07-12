@@ -23,6 +23,20 @@
         android:icon="@android:drawable/ic_menu_share"
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_show_layer_bano"
+          android:title="@string/action_show_layer_bano"
+          android:checkable="true"
+          android:orderInCategory="100"
+          android:showAsAction="never" />
+
+    <item android:id="@+id/action_show_layer_noname"
+          android:title="@string/action_show_layer_noname"
+          android:checkable="true"
+          android:orderInCategory="100"
+          android:showAsAction="never" />
+
+
     <item android:id="@+id/action_clear_all"
         android:title="@string/action_clear_all"
         android:orderInCategory="100"
