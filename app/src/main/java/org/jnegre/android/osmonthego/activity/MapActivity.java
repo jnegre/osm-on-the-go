@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import org.apache.http.protocol.HTTP;
 import org.jnegre.android.osmonthego.AddressExporter;
+import org.jnegre.android.osmonthego.ClearCacheTask;
 import org.jnegre.android.osmonthego.R;
 import org.jnegre.android.osmonthego.osmdroid.AddressOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ControlOverlay;
@@ -140,6 +141,9 @@ public class MapActivity extends Activity {
 				intent.putExtra(AddressActivity.EXTRA_LONGITUDE, position.getLongitude());
 				this.startActivityForResult(intent, REQUEST_CODE_NEW_ADDRESS);
 				return true;
+			case R.id.action_clear_cache:
+				clearCache();
+				return true;
 			case R.id.action_clear_all:
 				clearAllData();
 				return true;
@@ -198,6 +202,10 @@ public class MapActivity extends Activity {
 		ContentResolver cr = getContentResolver();
 		cr.delete(SurveyProviderMetaData.AddressTableMetaData.CONTENT_URI, null, null);
 		mapView.invalidate();
+	}
 
+	private void clearCache() {
+		//ugly, but gets the job done...
+		new ClearCacheTask(getApplicationContext()).execute();
 	}
 }
