@@ -95,7 +95,7 @@ public class MapActivity extends Activity {
 	}
 
 	@Override
-	protected void onDestroy() {
+	protected void onPause() {
 		Log.d(TAG, "saving state");
 		SharedPreferences pref = getPreferences(MODE_PRIVATE);
 		pref.edit()
@@ -105,12 +105,6 @@ public class MapActivity extends Activity {
 				.putBoolean(PREF_OVERLAY_BANO_ENABLED, banoOverlay.isEnabled())
 				.putBoolean(PREF_OVERLAY_NO_NAME_ENABLED, noNameOverlay.isEnabled())
 				.commit();
-
-		super.onDestroy();
-	}
-
-	@Override
-	protected void onPause() {
 		this.myLocationOverlay.disableMyLocation();
 		super.onPause();
 	}
