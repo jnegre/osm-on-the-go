@@ -17,7 +17,7 @@ public class ExtraTileSourceFactory {
 
 	//Overlay
 	public final static OnlineTileSourceBase BANO = new XYTileSource("BANO",
-			ResourceProxy.string.mapnik, 0, 17, 256, ".png", new String[]{
+			ResourceProxy.string.mapnik, 0, 19, 256, ".png", new String[]{
 			"http://a.layers.openstreetmap.fr/bano/",
 			"http://b.layers.openstreetmap.fr/bano/",
 			"http://c.layers.openstreetmap.fr/bano/"}
