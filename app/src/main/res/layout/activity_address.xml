@@ -48,7 +48,10 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/addr_street"
                 android:layout_span="2"
-                android:hint="@string/hint_addr_street" />
+                android:hint="@string/hint_addr_street"
+                android:maxLines="1"
+                android:imeOptions="actionDone"
+                android:inputType="text"/>
         </TableRow>
     </TableLayout>
 

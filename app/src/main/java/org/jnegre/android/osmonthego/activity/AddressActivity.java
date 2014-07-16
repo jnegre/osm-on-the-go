@@ -11,11 +11,14 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.jnegre.android.osmonthego.R;
 import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData;
@@ -92,6 +95,17 @@ public class AddressActivity extends Activity {
 		setContentView(R.layout.activity_address);
 		PadExtension savedPE = getSavedPadExtension();
 		showPadExtension(savedPE, null);
+
+		((EditText) this.findViewById(R.id.addr_street)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_DONE) {
+					endActivity();
+					return true;
+				}
+				return false;
+			}
+		});
 	}
 
 	public void onKeyPadButton(View target) {
@@ -106,6 +120,10 @@ public class AddressActivity extends Activity {
 	}
 
 	public void onOK(View target) {
+		endActivity();
+	}
+
+	private void endActivity() {
 		Log.d(TAG, "Inserting new address");
 		Intent startIntent = getIntent();
 		String number = ((EditText) this.findViewById(R.id.addr_number)).getText().toString();
