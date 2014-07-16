@@ -11,8 +11,12 @@
             android:orderInCategory="100"
             android:showAsAction="never" />
         <item android:id="@+id/action_address_uppercase"
-            android:title="upper"
-            android:orderInCategory="100"
-            android:showAsAction="never" />
+              android:title="upper"
+              android:orderInCategory="100"
+              android:showAsAction="never" />
+        <item android:id="@+id/action_address_symbol"
+              android:title="symbol"
+              android:orderInCategory="100"
+              android:showAsAction="never" />
     </group>
 </menu>

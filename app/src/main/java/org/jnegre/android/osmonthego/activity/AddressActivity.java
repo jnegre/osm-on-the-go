@@ -33,7 +33,8 @@ public class AddressActivity extends Activity {
 	private static enum PadExtension {
 		LOWER(R.id.action_address_lowercase, R.layout.frag_lowercase),
 		UPPER(R.id.action_address_uppercase, R.layout.frag_uppercase),
-		LATIN(R.id.action_address_latin, R.layout.frag_latin);
+		LATIN(R.id.action_address_latin, R.layout.frag_latin),
+		SYMBOL(R.id.action_address_symbol, R.layout.frag_symbol);
 
 		private final int action;
 		private final int layout;
@@ -148,6 +149,9 @@ public class AddressActivity extends Activity {
 				return true;
 			case R.id.action_address_latin:
 				showPadExtension(PadExtension.LATIN, item);
+				return true;
+			case R.id.action_address_symbol:
+				showPadExtension(PadExtension.SYMBOL, item);
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
