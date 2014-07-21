@@ -24,7 +24,9 @@ import org.jnegre.android.osmonthego.osmdroid.ExtraTileSourceFactory;
 import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.tileprovider.MapTileProviderBasic;
+import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
@@ -42,8 +44,32 @@ public class MapActivity extends Activity {
 	private final static String PREF_SCROLL_Y = "SCROLL_Y";
 	private final static String PREF_OVERLAY_BANO_ENABLED = "OVERLAY_BANO_ENABLED";
 	private final static String PREF_OVERLAY_NO_NAME_ENABLED = "OVERLAY_NO_NAME_ENABLED";
+	private final static String PREF_BASE_LAYER = "BASE_LAYER";
+	private final static BaseLayer DEFAULT_BASE_LAYER = BaseLayer.OSM_FR;
 
 	private final static int REQUEST_CODE_NEW_ADDRESS = 1;
+
+	private static enum BaseLayer {
+		OSM_FR(R.id.action_show_base_osmfr, ExtraTileSourceFactory.OSM_FR),
+		MAPNIK(R.id.action_show_base_mapnik, TileSourceFactory.MAPNIK),
+		MAPQUESTOSM(R.id.action_show_base_mapquestosm, TileSourceFactory.MAPQUESTOSM);
+
+		private final int action;
+		private final ITileSource tileSource;
+
+		BaseLayer(int action, ITileSource tileSource) {
+			this.action = action;
+			this.tileSource = tileSource;
+		}
+
+		ITileSource getTileSource() {
+			return tileSource;
+		}
+
+		public int getAction() {
+			return action;
+		}
+	}
 
 
 	private MapView mapView;
@@ -63,7 +89,6 @@ public class MapActivity extends Activity {
 		mapView = (MapView) findViewById(R.id.mapview);
 		mapView.setMultiTouchControls(true);
 
-		mapView.setTileSource(ExtraTileSourceFactory.OSM_FR);
 		banoOverlay = addOverlay(ExtraTileSourceFactory.BANO);
 		noNameOverlay = addOverlay(ExtraTileSourceFactory.NO_NAME);
 
@@ -80,16 +105,28 @@ public class MapActivity extends Activity {
 
 		Log.d(TAG, "restoring saved state");
 		SharedPreferences pref = getPreferences(MODE_PRIVATE);
+		useBaseLayer(getSavedBaseLayer(pref), null);
 		mapView.getController().setZoom(pref.getInt(PREF_ZOOM_LEVEL, 1));
 		mapView.scrollTo(pref.getInt(PREF_SCROLL_X, 0), pref.getInt(PREF_SCROLL_Y, 0));
 		banoOverlay.setEnabled(pref.getBoolean(PREF_OVERLAY_BANO_ENABLED, false));
 		noNameOverlay.setEnabled(pref.getBoolean(PREF_OVERLAY_NO_NAME_ENABLED, false));
 	}
 
+	private BaseLayer getSavedBaseLayer(SharedPreferences pref) {
+		String saved = pref.getString(PREF_BASE_LAYER, DEFAULT_BASE_LAYER.name());
+		try {
+			return Enum.valueOf(BaseLayer.class, saved);
+		} catch (IllegalArgumentException e) {
+			//the saved BaseLayer does not exist anymore
+			return DEFAULT_BASE_LAYER;
+		}
+	}
+
+
 	private TilesOverlay addOverlay(OnlineTileSourceBase source) {
 		Context context = this.getApplicationContext();
 		TilesOverlay tilesOverlay = new TilesOverlay(new MapTileProviderBasic(context, source), context);
-		tilesOverlay.setLoadingBackgroundColor(Color.argb(20,128,0,0));
+		tilesOverlay.setLoadingBackgroundColor(Color.argb(20, 128, 0, 0));
 		mapView.getOverlayManager().add(tilesOverlay);
 		return tilesOverlay;
 	}
@@ -119,6 +156,9 @@ public class MapActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.map, menu);
 		SharedPreferences pref = getPreferences(MODE_PRIVATE);
+		//base layer
+		menu.findItem(getSavedBaseLayer(pref).getAction()).setChecked(true);
+		//overlays
 		menu.findItem(R.id.action_show_layer_bano).setChecked(pref.getBoolean(PREF_OVERLAY_BANO_ENABLED, false));
 		menu.findItem(R.id.action_show_layer_noname).setChecked(pref.getBoolean(PREF_OVERLAY_NO_NAME_ENABLED, false));
 		return true;
@@ -150,6 +190,15 @@ public class MapActivity extends Activity {
 					mapView.getController().animateTo(myLocation);
 				}
 				return true;
+			case R.id.action_show_base_osmfr:
+				useBaseLayer(BaseLayer.OSM_FR, item);
+				return true;
+			case R.id.action_show_base_mapnik:
+				useBaseLayer(BaseLayer.MAPNIK, item);
+				return true;
+			case R.id.action_show_base_mapquestosm:
+				useBaseLayer(BaseLayer.MAPQUESTOSM, item);
+				return true;
 			case R.id.action_show_layer_bano:
 				item.setChecked(!item.isChecked());
 				banoOverlay.setEnabled(item.isChecked());
@@ -163,6 +212,20 @@ public class MapActivity extends Activity {
 			default:
 				return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void useBaseLayer(BaseLayer layer, MenuItem menuItem) {
+		if (menuItem != null) {
+			menuItem.setChecked(true);
+		}
+
+		mapView.setTileSource(layer.getTileSource());
+
+		SharedPreferences pref = getPreferences(MODE_PRIVATE);
+		pref.edit()
+				.putString(PREF_BASE_LAYER, layer.name())
+				.commit();
+
 	}
 
 	private void shareData() {

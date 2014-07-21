@@ -24,18 +24,36 @@
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
 
+    <!-- base layer -->
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/action_show_base_osmfr"
+              android:title="@string/action_show_base_osmfr"
+              android:orderInCategory="100"
+              android:showAsAction="never" />
+        <item android:id="@+id/action_show_base_mapnik"
+              android:title="@string/action_show_base_mapnik"
+              android:orderInCategory="100"
+              android:showAsAction="never" />
+        <item android:id="@+id/action_show_base_mapquestosm"
+              android:title="@string/action_show_base_mapquestosm"
+              android:orderInCategory="100"
+              android:showAsAction="never" />
+
+    </group>
+
+    <!-- overlays -->
     <item android:id="@+id/action_show_layer_bano"
           android:title="@string/action_show_layer_bano"
           android:checkable="true"
           android:orderInCategory="100"
           android:showAsAction="never" />
-
     <item android:id="@+id/action_show_layer_noname"
           android:title="@string/action_show_layer_noname"
           android:checkable="true"
           android:orderInCategory="100"
           android:showAsAction="never" />
 
+    <!-- cleaning -->
     <item android:id="@+id/action_clear_cache"
           android:title="@string/action_clear_cache"
           android:orderInCategory="100"
