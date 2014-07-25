@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -37,6 +38,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 public class MapActivity extends Activity {
 
+	private final static boolean DEBUG = false;
 	private final static String TAG = "MapActivity";
 
 	private final static String PREF_ZOOM_LEVEL = "ZOOM_LEVEL";
@@ -48,6 +50,8 @@ public class MapActivity extends Activity {
 	private final static BaseLayer DEFAULT_BASE_LAYER = BaseLayer.OSM_FR;
 
 	private final static int REQUEST_CODE_NEW_ADDRESS = 1;
+
+	private final static int LOADER_ADDRESS_LAYER = 1;
 
 	private static enum BaseLayer {
 		OSM_FR(R.id.action_show_base_osmfr, ExtraTileSourceFactory.OSM_FR),
@@ -98,8 +102,11 @@ public class MapActivity extends Activity {
 
 		myLocationOverlay = new MyLocationNewOverlay(context, new GpsMyLocationProvider(context), mapView);
 
+		AddressOverlay addressOverlay = new AddressOverlay(context, mapView);
+		getLoaderManager().initLoader(LOADER_ADDRESS_LAYER, null, addressOverlay);
+
 		mapView.getOverlays().add(this.myLocationOverlay);
-		mapView.getOverlays().add(new AddressOverlay(context));
+		mapView.getOverlays().add(addressOverlay);
 		mapView.getOverlays().add(scaleBarOverlay);
 		mapView.getOverlays().add(new ControlOverlay(context)); //must be the last one
 
@@ -110,6 +117,19 @@ public class MapActivity extends Activity {
 		mapView.scrollTo(pref.getInt(PREF_SCROLL_X, 0), pref.getInt(PREF_SCROLL_Y, 0));
 		banoOverlay.setEnabled(pref.getBoolean(PREF_OVERLAY_BANO_ENABLED, false));
 		noNameOverlay.setEnabled(pref.getBoolean(PREF_OVERLAY_NO_NAME_ENABLED, false));
+
+		if(DEBUG) {
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+					.detectAll()
+					.penaltyLog()
+					.build());
+
+			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+					.detectAll()
+					.penaltyLog()
+					.build());
+		}
+
 	}
 
 	private BaseLayer getSavedBaseLayer(SharedPreferences pref) {
