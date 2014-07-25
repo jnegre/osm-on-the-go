@@ -141,9 +141,6 @@ public class AddressActivity extends Activity {
 			Log.d(TAG, "address insert uri:" + uri);
 			Uri insertedUri = cr.insert(uri, cv);
 			Log.d(TAG, "inserted uri:" + insertedUri);
-			setResult(RESULT_OK);
-		} else {
-			setResult(RESULT_CANCELED);
 		}
 		finish();
 	}

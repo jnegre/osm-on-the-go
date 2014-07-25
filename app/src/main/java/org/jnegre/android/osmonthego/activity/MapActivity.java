@@ -49,8 +49,6 @@ public class MapActivity extends Activity {
 	private final static String PREF_BASE_LAYER = "BASE_LAYER";
 	private final static BaseLayer DEFAULT_BASE_LAYER = BaseLayer.OSM_FR;
 
-	private final static int REQUEST_CODE_NEW_ADDRESS = 1;
-
 	private final static int LOADER_ADDRESS_LAYER = 1;
 
 	private static enum BaseLayer {
@@ -193,7 +191,7 @@ public class MapActivity extends Activity {
 				Intent intent = new Intent(this, AddressActivity.class);
 				intent.putExtra(AddressActivity.EXTRA_LATITUDE, position.getLatitude());
 				intent.putExtra(AddressActivity.EXTRA_LONGITUDE, position.getLongitude());
-				this.startActivityForResult(intent, REQUEST_CODE_NEW_ADDRESS);
+				this.startActivity(intent);
 				return true;
 			case R.id.action_clear_cache:
 				clearCache();
@@ -266,19 +264,10 @@ public class MapActivity extends Activity {
 		}
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.d(TAG, "onActivityResult: " + requestCode + ", " + resultCode);
-		if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_NEW_ADDRESS) {
-			mapView.invalidate();
-		}
-	}
-
 	private void clearAllData() {
 		Log.d(TAG, "Clearing all data");
 		ContentResolver cr = getContentResolver();
 		cr.delete(SurveyProviderMetaData.AddressTableMetaData.CONTENT_URI, null, null);
-		mapView.invalidate();
 	}
 
 	private void clearCache() {
