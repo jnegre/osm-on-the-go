@@ -6,23 +6,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import org.apache.http.protocol.HTTP;
-import org.jnegre.android.osmonthego.AddressExporter;
 import org.jnegre.android.osmonthego.ClearCacheTask;
 import org.jnegre.android.osmonthego.R;
 import org.jnegre.android.osmonthego.osmdroid.AddressOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ControlOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ExtraTileSourceFactory;
 import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData;
+import org.jnegre.android.osmonthego.service.ExportService;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.tileprovider.MapTileProviderBasic;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
@@ -247,21 +244,7 @@ public class MapActivity extends Activity {
 	}
 
 	private void shareData() {
-		AddressExporter exporter = new AddressExporter(getApplicationContext());
-
-		if (exporter.export()) {
-			//FIXME i18n the subject and content
-			Intent emailIntent = new Intent(Intent.ACTION_SEND);
-			emailIntent.setType(HTTP.OCTET_STREAM_TYPE);
-			//emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"johndoe@exemple.com"});
-			emailIntent.putExtra(Intent.EXTRA_SUBJECT, "OSM On The Go");
-			emailIntent.putExtra(Intent.EXTRA_TEXT, "Your last survey.");
-			emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(exporter.getDestinationFile()));
-			startActivity(emailIntent);
-		} else {
-			//FIXME i18n
-			Toast.makeText(getApplicationContext(), "Could not export data.", Toast.LENGTH_SHORT).show();
-		}
+		ExportService.startOsmExport(getApplicationContext(), true);
 	}
 
 	private void clearAllData() {

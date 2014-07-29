@@ -16,6 +16,7 @@
     <string name="action_clear_all">Clear Survey</string>
 
     <string name="msg_cache_cleared">The tile cache has been cleared</string>
+    <string name="msg_export_failed">Failed to export data</string>
 
     <string name="label_addr_street">Street:</string>
     <string name="hint_addr_street">addr:street</string>
