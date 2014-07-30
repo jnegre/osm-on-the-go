@@ -4,11 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -21,7 +18,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.jnegre.android.osmonthego.R;
-import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData;
+import org.jnegre.android.osmonthego.service.SurveyService;
 
 public class AddressActivity extends Activity {
 
@@ -124,23 +121,15 @@ public class AddressActivity extends Activity {
 	}
 
 	private void endActivity() {
-		Log.d(TAG, "Inserting new address");
 		Intent startIntent = getIntent();
 		String number = ((EditText) this.findViewById(R.id.addr_number)).getText().toString();
-		String street = ((EditText) this.findViewById(R.id.addr_street)).getText().toString();
 		if (number.length() != 0) {
-			ContentValues cv = new ContentValues();
-			cv.put(SurveyProviderMetaData.AddressTableMetaData.LATITUDE, startIntent.getDoubleExtra(EXTRA_LATITUDE, 0));
-			cv.put(SurveyProviderMetaData.AddressTableMetaData.LONGITUDE, startIntent.getDoubleExtra(EXTRA_LONGITUDE, 0));
-			cv.put(SurveyProviderMetaData.AddressTableMetaData.NUMBER, number);
-			if (street.length() != 0) {
-				cv.put(SurveyProviderMetaData.AddressTableMetaData.STREET, street);
-			}
-			ContentResolver cr = getContentResolver();
-			Uri uri = SurveyProviderMetaData.AddressTableMetaData.CONTENT_URI;
-			Log.d(TAG, "address insert uri:" + uri);
-			Uri insertedUri = cr.insert(uri, cv);
-			Log.d(TAG, "inserted uri:" + insertedUri);
+			Log.d(TAG, "Inserting new address");
+			double lat = startIntent.getDoubleExtra(EXTRA_LATITUDE, 0);
+			double lng = startIntent.getDoubleExtra(EXTRA_LONGITUDE, 0);
+			String street = ((EditText) this.findViewById(R.id.addr_street)).getText().toString();
+
+			SurveyService.startInsertAddress(getApplicationContext(), lat, lng, number, street);
 		}
 		finish();
 	}

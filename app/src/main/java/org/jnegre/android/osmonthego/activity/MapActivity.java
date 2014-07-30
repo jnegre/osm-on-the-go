@@ -1,7 +1,6 @@
 package org.jnegre.android.osmonthego.activity;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,8 +17,8 @@ import org.jnegre.android.osmonthego.R;
 import org.jnegre.android.osmonthego.osmdroid.AddressOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ControlOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ExtraTileSourceFactory;
-import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData;
 import org.jnegre.android.osmonthego.service.ExportService;
+import org.jnegre.android.osmonthego.service.SurveyService;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.tileprovider.MapTileProviderBasic;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
@@ -249,8 +248,7 @@ public class MapActivity extends Activity {
 
 	private void clearAllData() {
 		Log.d(TAG, "Clearing all data");
-		ContentResolver cr = getContentResolver();
-		cr.delete(SurveyProviderMetaData.AddressTableMetaData.CONTENT_URI, null, null);
+		SurveyService.startDeleteAddress(getApplicationContext());
 	}
 
 	private void clearCache() {

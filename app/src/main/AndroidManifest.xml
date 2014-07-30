@@ -35,6 +35,10 @@
             android:name=".service.ExportService"
             android:exported="false" >
         </service>
+        <service
+            android:name=".service.SurveyService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>
