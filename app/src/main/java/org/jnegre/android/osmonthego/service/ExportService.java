@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,6 +19,7 @@ import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData.FixmeTableM
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 
 public class ExportService extends IntentService {
 	private final static String TAG = "ExportService";
@@ -231,8 +233,8 @@ public class ExportService extends IntentService {
 		File externalStorage = Environment.getExternalStorageDirectory();
 		String dirName = getApplicationInfo().packageName;
 		File dir = new File(externalStorage, dirName);
-		//TODO put date-hour-minute in the file name
-		return new File(dir, "onthego.osm");
+		String fileName = DateFormat.format("'onthego-'yyyy-MM-dd_H-m'.osm'", new Date()).toString();
+		return new File(dir, fileName);
 	}
 
 	/* Checks if external storage is available for read and write */
