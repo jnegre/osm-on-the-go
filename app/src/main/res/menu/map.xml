@@ -1,13 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MapActivity" >
-    <!--
     <item android:id="@+id/action_add_fixme"
         android:title="@string/action_add_fixme"
-        android:icon="@android:drawable/ic_menu_edit"
+        android:icon="@android:drawable/ic_menu_info_details"
         android:orderInCategory="50"
         android:showAsAction="ifRoom" />
-        -->
     <item android:id="@+id/action_add_address"
         android:title="@string/action_add_address"
         android:icon="@drawable/ic_address"

@@ -17,6 +17,7 @@ import org.jnegre.android.osmonthego.R;
 import org.jnegre.android.osmonthego.osmdroid.AddressOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ControlOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ExtraTileSourceFactory;
+import org.jnegre.android.osmonthego.osmdroid.FixmeOverlay;
 import org.jnegre.android.osmonthego.service.ExportService;
 import org.jnegre.android.osmonthego.service.SurveyService;
 import org.osmdroid.api.IGeoPoint;
@@ -46,6 +47,7 @@ public class MapActivity extends Activity {
 	private final static BaseLayer DEFAULT_BASE_LAYER = BaseLayer.OSM_FR;
 
 	private final static int LOADER_ADDRESS_LAYER = 1;
+	private final static int LOADER_FIXME_LAYER = 2;
 
 	private static enum BaseLayer {
 		OSM_FR(R.id.action_show_base_osmfr, ExtraTileSourceFactory.OSM_FR),
@@ -99,7 +101,11 @@ public class MapActivity extends Activity {
 		AddressOverlay addressOverlay = new AddressOverlay(context, mapView);
 		getLoaderManager().initLoader(LOADER_ADDRESS_LAYER, null, addressOverlay);
 
+		FixmeOverlay fixmeOverlay = new FixmeOverlay(context, mapView);
+		getLoaderManager().initLoader(LOADER_FIXME_LAYER, null, fixmeOverlay);
+
 		mapView.getOverlays().add(this.myLocationOverlay);
+		mapView.getOverlays().add(fixmeOverlay);
 		mapView.getOverlays().add(addressOverlay);
 		mapView.getOverlays().add(scaleBarOverlay);
 		mapView.getOverlays().add(new ControlOverlay(context)); //must be the last one
@@ -189,6 +195,11 @@ public class MapActivity extends Activity {
 				intent.putExtra(AddressActivity.EXTRA_LONGITUDE, position.getLongitude());
 				this.startActivity(intent);
 				return true;
+			case R.id.action_add_fixme:
+				position = mapView.getMapCenter();
+				FixmeDialogFragment.newInstance(position.getLatitude(), position.getLongitude())
+						.show(getFragmentManager(), FixmeDialogFragment.class.getName());
+				return true;
 			case R.id.action_clear_cache:
 				clearCache();
 				return true;
@@ -243,12 +254,13 @@ public class MapActivity extends Activity {
 	}
 
 	private void shareData() {
-		ExportService.startOsmExport(getApplicationContext(), true);
+		ExportService.startOsmExport(getApplicationContext(), true, true);
 	}
 
 	private void clearAllData() {
 		Log.d(TAG, "Clearing all data");
 		SurveyService.startDeleteAddress(getApplicationContext());
+		SurveyService.startDeleteFixme(getApplicationContext());
 	}
 
 	private void clearCache() {

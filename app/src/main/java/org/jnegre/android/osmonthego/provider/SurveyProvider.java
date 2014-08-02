@@ -15,6 +15,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData.AddressTableMetaData;
+import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData.FixmeTableMetaData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,9 +24,8 @@ public class SurveyProvider extends ContentProvider {
 
 	private final static String TAG = "SurveyProvider";
 
-	//projection map
+	//projection maps
 	private static Map<String, String> addressProjectionMap;
-
 	static {
 		addressProjectionMap = new HashMap<String, String>();
 		addressProjectionMap.put(AddressTableMetaData._ID, AddressTableMetaData._ID);
@@ -35,16 +35,29 @@ public class SurveyProvider extends ContentProvider {
 		addressProjectionMap.put(AddressTableMetaData.STREET, AddressTableMetaData.STREET);
 	}
 
+	private static Map<String, String> fixmeProjectionMap;
+	static {
+		fixmeProjectionMap = new HashMap<String, String>();
+		fixmeProjectionMap.put(FixmeTableMetaData._ID, FixmeTableMetaData._ID);
+		fixmeProjectionMap.put(FixmeTableMetaData.LATITUDE, FixmeTableMetaData.LATITUDE);
+		fixmeProjectionMap.put(FixmeTableMetaData.LONGITUDE, FixmeTableMetaData.LONGITUDE);
+		fixmeProjectionMap.put(FixmeTableMetaData.COMMENT, FixmeTableMetaData.COMMENT);
+	}
+
 
 	// URI matcher
 	private final static UriMatcher URI_MATCHER;
 	private final static int URI_INDICATOR_ADDRESS_COLLECTION = 1;
 	private final static int URI_INDICATOR_SINGLE_ADDRESS = 2;
+	private final static int URI_INDICATOR_FIXME_COLLECTION = 3;
+	private final static int URI_INDICATOR_SINGLE_FIXME = 4;
 
 	static {
 		URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 		URI_MATCHER.addURI(SurveyProviderMetaData.AUTHORITY, "addresses", URI_INDICATOR_ADDRESS_COLLECTION);
 		URI_MATCHER.addURI(SurveyProviderMetaData.AUTHORITY, "addresses/#", URI_INDICATOR_SINGLE_ADDRESS);
+		URI_MATCHER.addURI(SurveyProviderMetaData.AUTHORITY, "fixme", URI_INDICATOR_FIXME_COLLECTION);
+		URI_MATCHER.addURI(SurveyProviderMetaData.AUTHORITY, "fixme/#", URI_INDICATOR_SINGLE_FIXME);
 	}
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -64,7 +77,12 @@ public class SurveyProvider extends ContentProvider {
 					+ AddressTableMetaData.NUMBER + " TEXT,"
 					+ AddressTableMetaData.STREET + " TEXT"
 					+ ");");
-
+			db.execSQL("CREATE TABLE " + FixmeTableMetaData.TABLE_NAME + " ("
+					+ FixmeTableMetaData._ID + " INTEGER PRIMARY KEY,"
+					+ FixmeTableMetaData.LATITUDE + " REAL,"
+					+ FixmeTableMetaData.LONGITUDE + " REAL,"
+					+ FixmeTableMetaData.COMMENT + " TEXT"
+					+ ");");
 		}
 
 		@Override
@@ -73,8 +91,8 @@ public class SurveyProvider extends ContentProvider {
 			Log.w(TAG, "Upgrading database from version "
 					+ oldVersion + " to "
 					+ newVersion + ", which will destroy all old data");
-			db.execSQL("DROP TABLE IF EXISTS " +
-					AddressTableMetaData.TABLE_NAME);
+			db.execSQL("DROP TABLE IF EXISTS " + AddressTableMetaData.TABLE_NAME);
+			db.execSQL("DROP TABLE IF EXISTS " + FixmeTableMetaData.TABLE_NAME);
 			onCreate(db);
 
 		}
@@ -108,6 +126,16 @@ public class SurveyProvider extends ContentProvider {
 				qb.appendWhere(AddressTableMetaData._ID + "="
 						+ uri.getPathSegments().get(1));
 				break;
+			case URI_INDICATOR_FIXME_COLLECTION:
+				qb.setTables(FixmeTableMetaData.TABLE_NAME);
+				qb.setProjectionMap(fixmeProjectionMap);
+				break;
+			case URI_INDICATOR_SINGLE_FIXME:
+				qb.setTables(FixmeTableMetaData.TABLE_NAME);
+				qb.setProjectionMap(fixmeProjectionMap);
+				qb.appendWhere(AddressTableMetaData._ID + "="
+						+ uri.getPathSegments().get(1));
+				break;
 			default:
 				throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -126,7 +154,6 @@ public class SurveyProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues contentValues) {
-		//TODO handle default values?
 		String tableName;
 		String nullableColumn;
 
@@ -134,6 +161,10 @@ public class SurveyProvider extends ContentProvider {
 			case URI_INDICATOR_ADDRESS_COLLECTION:
 				tableName = AddressTableMetaData.TABLE_NAME;
 				nullableColumn = AddressTableMetaData.STREET;
+				break;
+			case URI_INDICATOR_FIXME_COLLECTION:
+				tableName = FixmeTableMetaData.TABLE_NAME;
+				nullableColumn = FixmeTableMetaData.COMMENT;
 				break;
 			default:
 				throw new IllegalArgumentException("Unknown URI " + uri);
@@ -156,6 +187,10 @@ public class SurveyProvider extends ContentProvider {
 		switch (URI_MATCHER.match(uri)) {
 			case URI_INDICATOR_ADDRESS_COLLECTION:
 				count = db.delete(AddressTableMetaData.TABLE_NAME,
+						where, whereArgs);
+				break;
+			case URI_INDICATOR_FIXME_COLLECTION:
+				count = db.delete(FixmeTableMetaData.TABLE_NAME,
 						where, whereArgs);
 				break;
 			case URI_INDICATOR_SINGLE_ADDRESS:
@@ -186,6 +221,10 @@ public class SurveyProvider extends ContentProvider {
 				return AddressTableMetaData.CONTENT_TYPE;
 			case URI_INDICATOR_SINGLE_ADDRESS:
 				return AddressTableMetaData.CONTENT_ITEM_TYPE;
+			case URI_INDICATOR_FIXME_COLLECTION:
+				return FixmeTableMetaData.CONTENT_TYPE;
+			case URI_INDICATOR_SINGLE_FIXME:
+				return FixmeTableMetaData.CONTENT_ITEM_TYPE;
 			default:
 				throw new IllegalArgumentException("Unknown URI " + uri);
 		}

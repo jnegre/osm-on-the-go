@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
+import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData.FixmeTableMetaData;
 import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData.AddressTableMetaData;
 
 public class SurveyService extends IntentService {
@@ -37,6 +38,27 @@ public class SurveyService extends IntentService {
 		Intent intent = new Intent(context, SurveyService.class);
 		intent.setAction(ACTION_DELETE);
 		intent.setData(AddressTableMetaData.CONTENT_URI);
+		context.startService(intent);
+	}
+
+	public static void startInsertFixme(Context context, double lat, double lng, String comment) {
+		Intent intent = new Intent(context, SurveyService.class);
+		intent.setAction(ACTION_INSERT);
+
+		ContentValues cv = new ContentValues();
+		cv.put(FixmeTableMetaData.LATITUDE, lat);
+		cv.put(FixmeTableMetaData.LONGITUDE, lng);
+		cv.put(FixmeTableMetaData.COMMENT, comment);
+
+		intent.setData(FixmeTableMetaData.CONTENT_URI);
+		intent.putExtra(EXTRA_CONTENT_VALUE, cv);
+		context.startService(intent);
+	}
+
+	public static void startDeleteFixme(Context context) {
+		Intent intent = new Intent(context, SurveyService.class);
+		intent.setAction(ACTION_DELETE);
+		intent.setData(FixmeTableMetaData.CONTENT_URI);
 		context.startService(intent);
 	}
 

@@ -12,7 +12,8 @@ import android.widget.Toast;
 
 import org.apache.http.protocol.HTTP;
 import org.jnegre.android.osmonthego.R;
-import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData;
+import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData.AddressTableMetaData;
+import org.jnegre.android.osmonthego.provider.SurveyProviderMetaData.FixmeTableMetaData;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,15 +24,17 @@ public class ExportService extends IntentService {
 
 	private final static String ACTION_EXPORT_OSM = "org.jnegre.android.osmonthego.service.action.EXPORT_OSM";
     private final static String EXTRA_INCLUDE_ADDRESS = "org.jnegre.android.osmonthego.service.extra.INCLUDE_ADDRESS";
+    private final static String EXTRA_INCLUDE_FIXME = "org.jnegre.android.osmonthego.service.extra.INCLUDE_FIXME";
 
 	private final static double MARGIN = 0.001;
 
 	private final Handler handler;
 
-	public static void startOsmExport(Context context, boolean includeAddress) {
+	public static void startOsmExport(Context context, boolean includeAddress, boolean includeFixme) {
         Intent intent = new Intent(context, ExportService.class);
         intent.setAction(ACTION_EXPORT_OSM);
         intent.putExtra(EXTRA_INCLUDE_ADDRESS, includeAddress);
+		intent.putExtra(EXTRA_INCLUDE_FIXME, includeFixme);
         context.startService(intent);
     }
 
@@ -46,7 +49,8 @@ public class ExportService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_EXPORT_OSM.equals(action)) {
 				boolean includeAddress = intent.getBooleanExtra(EXTRA_INCLUDE_ADDRESS, false);
-				handleOsmExport(includeAddress);
+				boolean includeFixme = intent.getBooleanExtra(EXTRA_INCLUDE_FIXME, false);
+				handleOsmExport(includeAddress, includeFixme);
             }
         }
     }
@@ -54,10 +58,9 @@ public class ExportService extends IntentService {
     /**
      * Handle export in the provided background thread
      */
-    private void handleOsmExport(boolean includeAddress) {
+    private void handleOsmExport(boolean includeAddress, boolean includeFixme) {
 		//TODO handle empty survey
 		//TODO handle bounds around +/-180
-		//TODO use includeAddress
 
 		if(!isExternalStorageWritable()) {
 			notifyUserOfError();
@@ -71,48 +74,100 @@ public class ExportService extends IntentService {
 		double maxLng = -200;
 		StringBuilder builder = new StringBuilder();
 
-		Uri uri = SurveyProviderMetaData.AddressTableMetaData.CONTENT_URI;
-		Cursor cursor = getContentResolver().query(uri,
-				null, //projection
-				null, //selection string
-				null, //selection args array of strings
-				null); //sort order
+		if (includeAddress) {
+			Uri uri = AddressTableMetaData.CONTENT_URI;
+			Cursor cursor = getContentResolver().query(uri,
+					new String[]{ //projection
+							AddressTableMetaData.LATITUDE,
+							AddressTableMetaData.LONGITUDE,
+							AddressTableMetaData.NUMBER,
+							AddressTableMetaData.STREET},
+					null, //selection string
+					null, //selection args array of strings
+					null); //sort order
 
-		if(cursor == null) {
-			notifyUserOfError();
-			return;
+			if(cursor == null) {
+				notifyUserOfError();
+				return;
+			}
+
+			try {
+				int iLat = cursor.getColumnIndex(AddressTableMetaData.LATITUDE);
+				int iLong = cursor.getColumnIndex(AddressTableMetaData.LONGITUDE);
+				int iNumber = cursor.getColumnIndex(AddressTableMetaData.NUMBER);
+				int iStreet = cursor.getColumnIndex(AddressTableMetaData.STREET);
+
+				for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+					//Gather values
+					double lat = cursor.getDouble(iLat);
+					double lng = cursor.getDouble(iLong);
+					String number = cursor.getString(iNumber);
+					String street = cursor.getString(iStreet);
+
+					minLat = Math.min(minLat, lat);
+					maxLat = Math.max(maxLat, lat);
+					minLng = Math.min(minLng, lng);
+					maxLng = Math.max(maxLng, lng);
+					builder.append("<node id=\"-")
+							.append(++id)
+							.append("\" lat=\"")
+							.append(lat)
+							.append("\" lon=\"")
+							.append(lng)
+							.append("\" version=\"1\" action=\"modify\">\n");
+					addOsmTag(builder, "addr:housenumber", number);
+					addOsmTag(builder, "addr:street", street);
+					builder.append("</node>\n");
+				}
+			} finally {
+				cursor.close();
+			}
 		}
 
-		try {
-			int iLat = cursor.getColumnIndex(SurveyProviderMetaData.AddressTableMetaData.LATITUDE);
-			int iLong = cursor.getColumnIndex(SurveyProviderMetaData.AddressTableMetaData.LONGITUDE);
-			int iNumber = cursor.getColumnIndex(SurveyProviderMetaData.AddressTableMetaData.NUMBER);
-			int iStreet = cursor.getColumnIndex(SurveyProviderMetaData.AddressTableMetaData.STREET);
+		if (includeFixme) {
+			Uri uri = FixmeTableMetaData.CONTENT_URI;
+			Cursor cursor = getContentResolver().query(uri,
+					new String[]{ //projection
+							FixmeTableMetaData.LATITUDE,
+							FixmeTableMetaData.LONGITUDE,
+							FixmeTableMetaData.COMMENT},
+					null, //selection string
+					null, //selection args array of strings
+					null); //sort order
 
-			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-				//Gather values
-				double lat = cursor.getDouble(iLat);
-				double lng = cursor.getDouble(iLong);
-				String number = cursor.getString(iNumber);
-				String street = cursor.getString(iStreet);
-
-				minLat = Math.min(minLat, lat);
-				maxLat = Math.max(maxLat, lat);
-				minLng = Math.min(minLng, lng);
-				maxLng = Math.max(maxLng, lng);
-				builder.append("<node id=\"-")
-						.append(++id)
-						.append("\" lat=\"")
-						.append(lat)
-						.append("\" lon=\"")
-						.append(lng)
-						.append("\" version=\"1\" action=\"modify\">\n");
-				addOsmTag(builder, "addr:housenumber", number);
-				addOsmTag(builder, "addr:street", street);
-				builder.append("</node>\n");
+			if(cursor == null) {
+				notifyUserOfError();
+				return;
 			}
-		} finally {
-			cursor.close();
+
+			try {
+				int iLat = cursor.getColumnIndex(FixmeTableMetaData.LATITUDE);
+				int iLong = cursor.getColumnIndex(FixmeTableMetaData.LONGITUDE);
+				int iComment = cursor.getColumnIndex(FixmeTableMetaData.COMMENT);
+
+				for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+					//Gather values
+					double lat = cursor.getDouble(iLat);
+					double lng = cursor.getDouble(iLong);
+					String comment = cursor.getString(iComment);
+
+					minLat = Math.min(minLat, lat);
+					maxLat = Math.max(maxLat, lat);
+					minLng = Math.min(minLng, lng);
+					maxLng = Math.max(maxLng, lng);
+					builder.append("<node id=\"-")
+							.append(++id)
+							.append("\" lat=\"")
+							.append(lat)
+							.append("\" lon=\"")
+							.append(lng)
+							.append("\" version=\"1\" action=\"modify\">\n");
+					addOsmTag(builder, "fixme", comment);
+					builder.append("</node>\n");
+				}
+			} finally {
+				cursor.close();
+			}
 		}
 
 		try {
