@@ -5,7 +5,7 @@
         android:title="@string/action_add_fixme"
         android:icon="@android:drawable/ic_menu_info_details"
         android:orderInCategory="50"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="always" />
     <item android:id="@+id/action_add_address"
         android:title="@string/action_add_address"
         android:icon="@drawable/ic_address"
@@ -15,7 +15,7 @@
         android:title="@string/action_my_location"
         android:icon="@android:drawable/ic_menu_mylocation"
         android:orderInCategory="100"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="always" />
     <item android:id="@+id/action_share"
         android:title="@string/action_share"
         android:icon="@android:drawable/ic_menu_share"
