@@ -1,6 +1,7 @@
 package org.jnegre.android.osmonthego.osmdroid;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -10,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -20,7 +22,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.Overlay;
 
-public class FixmeOverlay extends Overlay implements LoaderManager.LoaderCallbacks<Cursor> {
+public class FixmeOverlay extends Overlay implements LoaderManager.LoaderCallbacks<Cursor>, ItemSelector {
 
 	private final static String TAG = "FixmeOverlay";
 
@@ -28,6 +30,7 @@ public class FixmeOverlay extends Overlay implements LoaderManager.LoaderCallbac
 	private final Context context;
 	private final MapView mapView;
 	private Cursor cursor;
+	private Uri selectedItem;
 
 	public FixmeOverlay(Context ctx, MapView mapView) {
 		super(ctx);
@@ -37,9 +40,9 @@ public class FixmeOverlay extends Overlay implements LoaderManager.LoaderCallbac
 		this.paint = new Paint();
 		this.paint.setColor(Color.RED);
 		this.paint.setAntiAlias(true);
-		this.paint.setStyle(Paint.Style.FILL_AND_STROKE);
+		this.paint.setStyle(Paint.Style.FILL);
 		this.paint.setAlpha(255);
-		this.paint.setStrokeWidth(0.5f * mScale);
+		//this.paint.setStrokeWidth(0.5f * mScale);
 	}
 
 	@Override
@@ -48,13 +51,20 @@ public class FixmeOverlay extends Overlay implements LoaderManager.LoaderCallbac
 			return;
 		}
 
-		final Projection pj = mapView.getProjection();
-		final Point point = new Point();
-		final Rect bounds = new Rect();
+		selectedItem = null;
 
 		if(cursor != null) {
+			int iId = cursor.getColumnIndex(FixmeTableMetaData._ID);
 			int iLat = cursor.getColumnIndex(FixmeTableMetaData.LATITUDE);
 			int iLong = cursor.getColumnIndex(FixmeTableMetaData.LONGITUDE);
+
+			final Projection pj = mapView.getProjection();
+			final Point point = new Point();
+			final Rect bounds = new Rect();
+			float canvasCenterX = c.getWidth()/2f;
+			float canvasCenterY = c.getHeight()/2f;
+			final float radius =  5 * mScale;
+			final float radiusSquare = radius * radius;
 
 			//walk through the rows based on indexes
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -66,7 +76,14 @@ public class FixmeOverlay extends Overlay implements LoaderManager.LoaderCallbac
 
 				pj.toPixels(geoPoint, point);
 
-				c.drawCircle(point.x, point.y, 5 * mScale, paint);
+				c.drawCircle(point.x, point.y, radius, paint);
+
+
+				//Is it at the center of the map?
+				if((point.x-canvasCenterX)*(point.x-canvasCenterX)+(point.y-canvasCenterY)*(point.y-canvasCenterY)<radiusSquare) {
+					selectedItem = ContentUris.withAppendedId(FixmeTableMetaData.CONTENT_URI, cursor.getLong(iId));
+				}
+
 			}
 		}
 	}
@@ -77,7 +94,7 @@ public class FixmeOverlay extends Overlay implements LoaderManager.LoaderCallbac
 		return new CursorLoader(
 				context,
 				FixmeTableMetaData.CONTENT_URI,
-				new String[]{FixmeTableMetaData.LATITUDE, FixmeTableMetaData.LONGITUDE},
+				new String[]{FixmeTableMetaData._ID, FixmeTableMetaData.LATITUDE, FixmeTableMetaData.LONGITUDE},
 				null,
 				null,
 				null);
@@ -94,5 +111,10 @@ public class FixmeOverlay extends Overlay implements LoaderManager.LoaderCallbac
 	public void onLoaderReset(Loader<Cursor> cursorLoader) {
 		Log.d(TAG, "onLoaderReset");
 		this.cursor = null;
+	}
+
+	@Override
+	public Uri getSelectedItem() {
+		return isEnabled()?selectedItem:null;
 	}
 }

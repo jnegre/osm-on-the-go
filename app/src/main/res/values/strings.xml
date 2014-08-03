@@ -5,6 +5,7 @@
     <string name="action_settings">Settings</string>
     <string name="action_add_fixme">Add Fixme</string>
     <string name="action_add_address">Add Address</string>
+    <string name="action_delete">Delete</string>
     <string name="action_my_location">Show My Location</string>
     <string name="action_share">Share</string>
     <string name="action_show_base_osmfr">Osmfr</string>

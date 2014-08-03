@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.DisplayMetrics;
@@ -18,6 +19,7 @@ import org.jnegre.android.osmonthego.osmdroid.AddressOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ControlOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ExtraTileSourceFactory;
 import org.jnegre.android.osmonthego.osmdroid.FixmeOverlay;
+import org.jnegre.android.osmonthego.osmdroid.ItemSelector;
 import org.jnegre.android.osmonthego.service.ExportService;
 import org.jnegre.android.osmonthego.service.SurveyService;
 import org.osmdroid.api.IGeoPoint;
@@ -31,6 +33,9 @@ import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.TilesOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MapActivity extends Activity {
@@ -76,6 +81,7 @@ public class MapActivity extends Activity {
 	private TilesOverlay banoOverlay;
 	private TilesOverlay noNameOverlay;
 	private MyLocationNewOverlay myLocationOverlay;
+	private List<ItemSelector> itemSelectors = new ArrayList<ItemSelector>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -105,10 +111,14 @@ public class MapActivity extends Activity {
 		getLoaderManager().initLoader(LOADER_FIXME_LAYER, null, fixmeOverlay);
 
 		mapView.getOverlays().add(this.myLocationOverlay);
-		mapView.getOverlays().add(fixmeOverlay);
 		mapView.getOverlays().add(addressOverlay);
+		mapView.getOverlays().add(fixmeOverlay);
 		mapView.getOverlays().add(scaleBarOverlay);
 		mapView.getOverlays().add(new ControlOverlay(context)); //must be the last one
+
+		//must be in reverse order
+		itemSelectors.add(fixmeOverlay);
+		itemSelectors.add(addressOverlay);
 
 		Log.d(TAG, "restoring saved state");
 		SharedPreferences pref = getPreferences(MODE_PRIVATE);
@@ -200,6 +210,9 @@ public class MapActivity extends Activity {
 				FixmeDialogFragment.newInstance(position.getLatitude(), position.getLongitude())
 						.show(getFragmentManager(), FixmeDialogFragment.class.getName());
 				return true;
+			case R.id.action_delete:
+				delete();
+				return true;
 			case R.id.action_clear_cache:
 				clearCache();
 				return true;
@@ -251,6 +264,25 @@ public class MapActivity extends Activity {
 				.putString(PREF_BASE_LAYER, layer.name())
 				.commit();
 
+	}
+
+	private Uri getSelectedItem() {
+		Uri uri;
+		for(ItemSelector selector: itemSelectors) {
+			uri = selector.getSelectedItem();
+			if(uri != null) {
+				return uri;
+			}
+		}
+		return null;
+	}
+
+	private void delete() {
+		Uri item = getSelectedItem();
+		if(item != null) {
+			Log.d(TAG, "Delete "+item);
+			SurveyService.startDelete(getApplicationContext(), item);
+		}
 	}
 
 	private void shareData() {

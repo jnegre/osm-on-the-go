@@ -16,6 +16,12 @@ public class SurveyService extends IntentService {
 
 	private static final String EXTRA_CONTENT_VALUE = "org.jnegre.android.osmonthego.service.extra.CONTENT_VALUE";
 
+	public static void startDelete(Context context, Uri data) {
+		Intent intent = new Intent(context, SurveyService.class);
+		intent.setAction(ACTION_DELETE);
+		intent.setData(data);
+		context.startService(intent);
+	}
 
 	public static void startInsertAddress(Context context, double lat, double lng, String number, String street) {
 		Intent intent = new Intent(context, SurveyService.class);
@@ -35,10 +41,7 @@ public class SurveyService extends IntentService {
 	}
 
 	public static void startDeleteAddress(Context context) {
-		Intent intent = new Intent(context, SurveyService.class);
-		intent.setAction(ACTION_DELETE);
-		intent.setData(AddressTableMetaData.CONTENT_URI);
-		context.startService(intent);
+		startDelete(context, AddressTableMetaData.CONTENT_URI);
 	}
 
 	public static void startInsertFixme(Context context, double lat, double lng, String comment) {
@@ -56,10 +59,7 @@ public class SurveyService extends IntentService {
 	}
 
 	public static void startDeleteFixme(Context context) {
-		Intent intent = new Intent(context, SurveyService.class);
-		intent.setAction(ACTION_DELETE);
-		intent.setData(FixmeTableMetaData.CONTENT_URI);
-		context.startService(intent);
+		startDelete(context, FixmeTableMetaData.CONTENT_URI);
 	}
 
 

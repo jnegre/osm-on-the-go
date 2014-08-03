@@ -184,6 +184,7 @@ public class SurveyProvider extends ContentProvider {
 	public int delete(Uri uri, String where, String[] whereArgs) {
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
 		int count;
+		String rowId;
 		switch (URI_MATCHER.match(uri)) {
 			case URI_INDICATOR_ADDRESS_COLLECTION:
 				count = db.delete(AddressTableMetaData.TABLE_NAME,
@@ -194,9 +195,17 @@ public class SurveyProvider extends ContentProvider {
 						where, whereArgs);
 				break;
 			case URI_INDICATOR_SINGLE_ADDRESS:
-				String rowId = uri.getPathSegments().get(1);
+				rowId = uri.getPathSegments().get(1);
 				count = db.delete(AddressTableMetaData.TABLE_NAME,
 						AddressTableMetaData._ID + "=" + rowId //FIXME sqli???
+								+ (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""),
+						whereArgs
+				);
+				break;
+			case URI_INDICATOR_SINGLE_FIXME:
+				rowId = uri.getPathSegments().get(1);
+				count = db.delete(FixmeTableMetaData.TABLE_NAME,
+						FixmeTableMetaData._ID + "=" + rowId //FIXME sqli???
 								+ (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""),
 						whereArgs
 				);
