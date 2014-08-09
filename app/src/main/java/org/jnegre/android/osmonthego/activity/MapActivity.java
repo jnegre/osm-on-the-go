@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.jnegre.android.osmonthego.ClearCacheTask;
+import org.jnegre.android.osmonthego.util.DelayedPausable;
 import org.jnegre.android.osmonthego.R;
 import org.jnegre.android.osmonthego.osmdroid.AddressOverlay;
 import org.jnegre.android.osmonthego.osmdroid.ControlOverlay;
@@ -36,6 +38,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class MapActivity extends Activity {
@@ -77,11 +80,24 @@ public class MapActivity extends Activity {
 	}
 
 
+	private final Handler handler = new Handler();
+
 	private MapView mapView;
 	private TilesOverlay banoOverlay;
 	private TilesOverlay noNameOverlay;
 	private MyLocationNewOverlay myLocationOverlay;
 	private List<ItemSelector> itemSelectors = new ArrayList<ItemSelector>();
+	private final DelayedPausable delayedLocation = new DelayedPausable(TimeUnit.MINUTES.toMillis(2)) {
+		@Override
+		protected void onPause() {
+			myLocationOverlay.disableMyLocation();
+		}
+
+		@Override
+		protected void onResume() {
+			myLocationOverlay.enableMyLocation();
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -172,14 +188,14 @@ public class MapActivity extends Activity {
 				.putBoolean(PREF_OVERLAY_BANO_ENABLED, banoOverlay.isEnabled())
 				.putBoolean(PREF_OVERLAY_NO_NAME_ENABLED, noNameOverlay.isEnabled())
 				.commit();
-		this.myLocationOverlay.disableMyLocation();
+		delayedLocation.pause();
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		this.myLocationOverlay.enableMyLocation();
+		delayedLocation.resume();
 	}
 
 	@Override
