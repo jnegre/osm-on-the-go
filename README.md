@@ -17,3 +17,5 @@ Main features:
 ![Configurable keypad](doc/screen/address_upper.png)
 
 ![Enter a Fixme to mark objects and places that need further attention](doc/screen/fixme.png)
+
+![Share data](doc/screen/share.png)
