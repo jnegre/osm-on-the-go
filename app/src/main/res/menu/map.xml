@@ -50,8 +50,13 @@
           android:checkable="true"
           android:orderInCategory="100"
           android:showAsAction="never" />
-    <item android:id="@+id/action_show_layer_noname"
-          android:title="@string/action_show_layer_noname"
+    <item android:id="@+id/action_show_layer_noname_fr"
+          android:title="@string/action_show_layer_noname_fr"
+          android:checkable="true"
+          android:orderInCategory="100"
+          android:showAsAction="never" />
+    <item android:id="@+id/action_show_layer_noname_ch"
+          android:title="@string/action_show_layer_noname_ch"
           android:checkable="true"
           android:orderInCategory="100"
           android:showAsAction="never" />

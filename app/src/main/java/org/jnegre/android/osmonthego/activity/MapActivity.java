@@ -50,7 +50,8 @@ public class MapActivity extends Activity {
 	private final static String PREF_SCROLL_X = "SCROLL_X";
 	private final static String PREF_SCROLL_Y = "SCROLL_Y";
 	private final static String PREF_OVERLAY_BANO_ENABLED = "OVERLAY_BANO_ENABLED";
-	private final static String PREF_OVERLAY_NO_NAME_ENABLED = "OVERLAY_NO_NAME_ENABLED";
+	private final static String PREF_OVERLAY_NO_NAME_FR_ENABLED = "OVERLAY_NO_NAME_FR_ENABLED";
+	private final static String PREF_OVERLAY_NO_NAME_CH_ENABLED = "OVERLAY_NO_NAME_CH_ENABLED";
 	private final static String PREF_BASE_LAYER = "BASE_LAYER";
 	private final static BaseLayer DEFAULT_BASE_LAYER = BaseLayer.OSM_FR;
 
@@ -84,7 +85,8 @@ public class MapActivity extends Activity {
 
 	private MapView mapView;
 	private TilesOverlay banoOverlay;
-	private TilesOverlay noNameOverlay;
+	private TilesOverlay noNameFrOverlay;
+	private TilesOverlay noNameChOverlay;
 	private MyLocationNewOverlay myLocationOverlay;
 	private List<ItemSelector> itemSelectors = new ArrayList<ItemSelector>();
 	private final DelayedPausable delayedLocation = new DelayedPausable(TimeUnit.MINUTES.toMillis(2)) {
@@ -112,7 +114,8 @@ public class MapActivity extends Activity {
 		mapView.setMultiTouchControls(true);
 
 		banoOverlay = addOverlay(ExtraTileSourceFactory.BANO);
-		noNameOverlay = addOverlay(ExtraTileSourceFactory.NO_NAME);
+		noNameFrOverlay = addOverlay(ExtraTileSourceFactory.NO_NAME_FR);
+		noNameChOverlay = addOverlay(ExtraTileSourceFactory.NO_NAME_CH);
 
 		ScaleBarOverlay scaleBarOverlay = new ScaleBarOverlay(context);
 		scaleBarOverlay.setCentred(true);
@@ -142,7 +145,8 @@ public class MapActivity extends Activity {
 		mapView.getController().setZoom(pref.getInt(PREF_ZOOM_LEVEL, 1));
 		mapView.scrollTo(pref.getInt(PREF_SCROLL_X, 0), pref.getInt(PREF_SCROLL_Y, 0));
 		banoOverlay.setEnabled(pref.getBoolean(PREF_OVERLAY_BANO_ENABLED, false));
-		noNameOverlay.setEnabled(pref.getBoolean(PREF_OVERLAY_NO_NAME_ENABLED, false));
+		noNameFrOverlay.setEnabled(pref.getBoolean(PREF_OVERLAY_NO_NAME_FR_ENABLED, false));
+		noNameChOverlay.setEnabled(pref.getBoolean(PREF_OVERLAY_NO_NAME_CH_ENABLED, false));
 
 		if(DEBUG) {
 			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
@@ -186,7 +190,8 @@ public class MapActivity extends Activity {
 				.putInt(PREF_SCROLL_Y, mapView.getScrollY())
 				.putInt(PREF_ZOOM_LEVEL, mapView.getZoomLevel())
 				.putBoolean(PREF_OVERLAY_BANO_ENABLED, banoOverlay.isEnabled())
-				.putBoolean(PREF_OVERLAY_NO_NAME_ENABLED, noNameOverlay.isEnabled())
+				.putBoolean(PREF_OVERLAY_NO_NAME_FR_ENABLED, noNameFrOverlay.isEnabled())
+				.putBoolean(PREF_OVERLAY_NO_NAME_CH_ENABLED, noNameChOverlay.isEnabled())
 				.commit();
 		delayedLocation.pause();
 		super.onPause();
@@ -206,7 +211,8 @@ public class MapActivity extends Activity {
 		menu.findItem(getSavedBaseLayer(pref).getAction()).setChecked(true);
 		//overlays
 		menu.findItem(R.id.action_show_layer_bano).setChecked(pref.getBoolean(PREF_OVERLAY_BANO_ENABLED, false));
-		menu.findItem(R.id.action_show_layer_noname).setChecked(pref.getBoolean(PREF_OVERLAY_NO_NAME_ENABLED, false));
+		menu.findItem(R.id.action_show_layer_noname_fr).setChecked(pref.getBoolean(PREF_OVERLAY_NO_NAME_FR_ENABLED, false));
+		menu.findItem(R.id.action_show_layer_noname_ch).setChecked(pref.getBoolean(PREF_OVERLAY_NO_NAME_CH_ENABLED, false));
 		return true;
 	}
 
@@ -258,9 +264,14 @@ public class MapActivity extends Activity {
 				banoOverlay.setEnabled(item.isChecked());
 				mapView.invalidate();
 				return true;
-			case R.id.action_show_layer_noname:
+			case R.id.action_show_layer_noname_fr:
 				item.setChecked(!item.isChecked());
-				noNameOverlay.setEnabled(item.isChecked());
+				noNameFrOverlay.setEnabled(item.isChecked());
+				mapView.invalidate();
+				return true;
+			case R.id.action_show_layer_noname_ch:
+				item.setChecked(!item.isChecked());
+				noNameChOverlay.setEnabled(item.isChecked());
 				mapView.invalidate();
 				return true;
 			default:

@@ -22,10 +22,14 @@ public class ExtraTileSourceFactory {
 			"http://b.layers.openstreetmap.fr/bano/",
 			"http://c.layers.openstreetmap.fr/bano/"}
 	);
-	public final static OnlineTileSourceBase NO_NAME = new XYTileSource("NoName",
+	public final static OnlineTileSourceBase NO_NAME_FR = new XYTileSource("NoNameFr",
 			ResourceProxy.string.mapnik, 0, 19, 256, ".png", new String[]{
 			"http://a.layers.openstreetmap.fr/noname/",
 			"http://b.layers.openstreetmap.fr/noname/",
 			"http://c.layers.openstreetmap.fr/noname/"}
+	);
+	public final static OnlineTileSourceBase NO_NAME_CH = new XYTileSource("NoNameCh",
+			ResourceProxy.string.mapnik, 0, 18, 256, ".png", new String[]{
+			"http://tile3.poole.ch/noname/"}
 	);
 }

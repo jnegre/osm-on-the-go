@@ -12,7 +12,8 @@
     <string name="action_show_base_mapnik">Mapnik</string>
     <string name="action_show_base_mapquestosm">MapquestOSM</string>
     <string name="action_show_layer_bano">Show BANO</string>
-    <string name="action_show_layer_noname">Show NONAME</string>
+    <string name="action_show_layer_noname_fr">Show NONAME (FR)</string>
+    <string name="action_show_layer_noname_ch">Show NONAME (CH)</string>
     <string name="action_clear_cache">Clear Tile Cache</string>
     <string name="action_clear_all">Clear Survey</string>
 
