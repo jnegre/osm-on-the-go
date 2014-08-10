@@ -12,6 +12,8 @@ Main features:
 
 ![View the map and your data](doc/screen/map.png)
 
+![See streets without a name](doc/screen/noname.png)
+
 ![Enter addresses](doc/screen/address_latin.png)
 
 ![Configurable keypad](doc/screen/address_upper.png)
